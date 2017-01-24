@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Capito - Universal Changelogs</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<!-- Load stylesheets -->
+		<link rel="stylesheet" href="res/bootstrap/css/bootstrap.css" type="text/css" />
+		<link rel="stylesheet" href="res/bootstrap/css/bootstrap-theme.css" type="text/css" />
+		<link rel="stylesheet" href="res/bootstrap/css/spin.css" type="text/css" />
+		<link rel="stylesheet" href="res/select2/css/select2.css" type="text/css" />
+		<link rel="stylesheet" href="res/capito.css" type="text/css" />
+		<!-- Load scripts -->
+		<script src="res/jquery/js/jquery.js"></script>
+		<script src="res/bootstrap/js/bootstrap.js"></script>
+		<script src="res/select2/js/select2.full.js"></script>
+		<script src="res/vue.js"></script>
+		<!-- Load vue components -->
+		<script src="res/components/start.js"></script>
+		<script src="res/components/navbar.js"></script>
+		<script src="res/components/classic.js"></script>
+		<script src="res/components/timeline.js"></script>
+		<script src="res/components/minversion.js"></script>
+	</head>
+	<body>
+		<!--  Capito app -->
+		<div id="capito">
+			<!-- Navigation bar -->
+			<navbar :view="view" @menu="menu" @empty="empty"></navbar>
+			<!-- Changelog -->
+			<div v-if="loaded" class="col-md-offset-1 col-md-10" >
+				<classic v-if="view.is(0)" :model="changelog"></classic>
+				<timeline v-if="view.is(1)" :model="changelog"></timeline>
+				<minversion v-if="view.is(2)" :model="changelog"></minversion>
+			</div>
+			<!-- Menu -->
+			<div v-else class="col-md-offset-3 col-md-6" >
+				<start :start="start" @open="open"></start>
+			</div>
+		</div>
+	</body>
+	<script src="res/capito.js"></script>
+</html>
