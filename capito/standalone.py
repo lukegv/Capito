@@ -54,6 +54,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         else:
             self.error(404, 'Invalid path');
     
+    # Lists the saved changelogs
     def list_logs(self):
         with dbm.open('store', 'c') as store:
             keys = list(map(lambda v: v.decode(), store.keys()));
@@ -61,6 +62,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             self.respond(200, 'application/json');
             self.wfile.write(result.encode());
     
+    # Loads a saved changelog
     def load_log(self):
         name = self.params.get('name', None);
         if name == None:
@@ -74,6 +76,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             self.respond(200, 'application/json');
             self.wfile.write(content);
     
+    # Saves a changelog
     def save_log(self):
         length = int(self.headers['Content-Length']);
         content = self.rfile.read(length).decode();
@@ -85,6 +88,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             store[name] = content;
         self.respond(204, '');
     
+    # Deletes a saved changelog
     def delete_log(self):
         name = self.params.get('name', None);
         if name == None:
@@ -94,6 +98,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             del store[name];
         self.respond(204, None);
     
+    # Parses the changelog behind a given url
     def parse_remote(self):
         url = self.params['url'] or '';
         result = None;
@@ -113,6 +118,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         else:
             self.error(result.status_code, 'Remote source unavailable: ' + result.reason);
     
+    # Serves a file under the 'res' folder
     def serve_resource(self, path = None):
         self.path = path or self.path[1:];
         stream = None;
@@ -127,10 +133,12 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             if stream:
                 stream.close();
     
+    # Responds a request with an error
     def error(self, code, message):
         self.respond(code, 'text/plain');
         self.wfile.write(('ERROR: ' + message).encode());
-
+        
+    # Responds a request with the specified header
     def respond(self, code, mime):
         self.send_response(code);
         self.send_header('Content-type', mime);

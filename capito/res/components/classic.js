@@ -1,3 +1,4 @@
+// Defines the component to show and edit a change
 Vue.component('change', {
 	props: ['model', 'index'],
 	template: '\
@@ -26,24 +27,29 @@ Vue.component('change', {
 		};
 	},
 	computed: {
+		// Gets a string representing the change description
 		description: function() {
 			return this.model.description ? this.model.description : '???';
 		},
+		// Gets the color of the change category
 		color: function() {
 			return colorize(this.model.category);
 		}
 	},
 	methods: {
+		// Emits the message to destroy this change
 		destroy: function() {
 			this.editable = false;
 			this.$emit('destroyed', this.index);
 		},
+		// Sets the option to edit the change
 		edit: function(on) {
 			this.editable = on;
 		}
 	}
 });
 
+// Defines the component to show and edit a version
 Vue.component('version', {
 	props: ['model', 'index'],
 	template: '\
@@ -78,31 +84,38 @@ Vue.component('version', {
 		};
 	},
 	computed: {
+		// Gets a string representing the version date
 		date: function() {
 			return new Date(this.model.date).toLocaleDateString();
 		},
+		// Gets a string representing the version name
 		name: function() {
 			return this.model.name ? this.model.name : '???';
 		}
 	},
 	methods: {
+		// Adds a new change to the version
 		add: function() {
 			this.model.changes.push({ description: '', category: '', tags: [] });
 		},
+		// Sets the option to edit the version
 		edit: function(on) {
 			this.editable = on;
 			if(!on) this.$emit('edited');
 		},
+		// Emits the message to destroy this version
 		destroy: function() {
 			this.editable = false;
 			this.$emit('destroyed', this.index);
 		},
+		// Removes a change of this version
 		remove: function(index) {
 			this.model.changes.splice(index, 1);
 		}
 	}
 });
 
+// 
 Vue.component('classic', {
 	props: ['model'],
 	template: '\
@@ -140,59 +153,76 @@ Vue.component('classic', {
 		</div>\
 	',
 	created: function() {
+		// Sort the versions on creation
 		this.sort();
 	},
 	data: function() {
 		return { editable: false }
 	},
 	computed: {
+		// Gets a string representation for the changelog name
 		name: function() {
 			return this.model.name ? this.model.name : '???';
 		}
 	},
 	methods: {
+		// Adds a new version to the changelog
 		add: function() {
 			this.model.versions.unshift({ name: '', date: '', changes: [] });
 			this.sort();
 		},
+		// Sets the option to edit the changelog
 		edit: function(on) {
 			this.editable = on;
 		},
+		// Creates a link to the anchor of a version
 		link: function(version) {
 			return '#' + version.name;
 		},
+		// Removes a version of the changelog
 		remove: function(index) {
 			this.model.versions.splice(index, 1);
 		},
+		// Sorts the versions of the changelog by their name
 		sort: function() {
 			this.model.versions = this.model.versions.sort(compare);
 		},
+		// Saves the changelog
 		save: function() {
 			$.post('/log', JSON.stringify(this.model));
 		}
 	}
 });
 
+/** Determines a bootstrap label class to colorize a change category according to the category value */
 function colorize(name) {
+	// Color: dark blue
 	if (['Feature', 'Add', 'Added', 'New', 'Dev'].indexOf(name) >= 0) {
 		return 'label-primary';
 	}
+	// Color: green
 	if (['Fixed', 'Bugfix', 'Fix'].indexOf(name) >= 0) {
 		return 'label-success';
 	}
+	// Color: red
 	if (['Security', 'Warning'].indexOf(name) >= 0) {
 		return 'label-danger';
 	}
+	// Color: yellow
 	if (['Removed', 'Remove', 'Deprecated', 'Missing'].indexOf(name) >= 0) {
 		return 'label-warning';
 	}
+	// Color: light blue
 	if (['Changed', 'Change', 'Tweak'].indexOf(name) >= 0) {
 		return 'label-info';
 	}
+	// Color: gray
 	return 'label-default';
 }
 
+/** Compares two version by their name (for sorting) */
 function compare(v1, v2) {
+	// If a name if missing, the version should be on top
 	if (!v1.name) return -1;
 	if (!v2.name) return 1;
 	return -v1.name.localeCompare(v2.name);

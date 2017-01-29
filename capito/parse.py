@@ -6,11 +6,13 @@ import requests;
 from capito import changelogs;
 from capito.changelogs import Changelog, Version;
 
+# Define regular expressions to detect changelog parts
 regex_version = "^(?:[^*#\s-]).*(\d+(?:\.\w+)+).*";
 regex_version_name = "(\d+(?:\.\w+)+)";
 regex_date = "([0-9].*[0-9])";
 regex_change = "(?:[*#-])\s.*";
 
+# Define regular expressions to detect github pages
 regex_github = ".*github.com\/([\w-]*\/[\w-]*)\/?.*";
 regex_github_raw = ".*raw.githubusercontent.com.*";
 regex_github_blob = ".*github.com\/([\w-]*\/[\w-]*)\/blob\/.*";
@@ -148,5 +150,4 @@ def process(url, mime, content, parse_only=False, name=None):
     # Apply possible name to parsed changelog
     if changelog and changelog.name == '' and not name == None:
         changelog.name = name;
-    print(len(changelog.versions));
     return changelog;

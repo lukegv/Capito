@@ -1,3 +1,4 @@
+// Defines a component to show a changelog item
 Vue.component('item', {
 	props: ['name'],
 	template: '\
@@ -12,13 +13,16 @@ Vue.component('item', {
 		return { hovered: false };
 	},
 	methods: {
+		// Sets the hover state of this changelog item
 		hover: function(on) {
 			this.hovered = on;
 		},
+		// Selects a changelog
 		select: function(name) {
 			self = this;
 			$.get('/log?name=' + name, (changelog) => { self.$emit('open', changelog); });
 		},
+		// Removes a changelog
 		remove: function(name) {
 			self = this;
 			$.post('/delete?name=' + name, () => { self.$emit('removed'); });
@@ -26,6 +30,7 @@ Vue.component('item', {
 	}
 });
 
+// Defines the list menu component
 Vue.component('list', {
 	props: ['active'],
 	template: '\
@@ -46,7 +51,8 @@ Vue.component('list', {
 			</div>\
 		</div>\
 	',
-	mounted: function() {
+	created: function() {
+		// Load the changelogs at the start
 		this.load();
 	},
 	data: function() { 
@@ -56,24 +62,29 @@ Vue.component('list', {
 		};
 	},
 	computed: {
+		// Gets a search query filtered changelog list
 		result: function() { 
 			return this.all.filter(name => name.includes(this.query));
 		}
 	},
 	methods: {
+		// Loads the saved changelogs
 		load: function() {
 			self = this;
 			$.get('/list', result => { self.all = result; });
 		},
+		// Emits the message to open a changelog
 		open: function(changelog) {
 			this.$emit('open', changelog);
 		},
+		// Reloads the changelogs after a removal
 		removed: function() {
 			this.load();
 		}
 	}
 });
 
+// Defines the parse menu component
 Vue.component('parse', {
 	props: ['active'],
 	template: '\
@@ -100,6 +111,7 @@ Vue.component('parse', {
 		};
 	},
 	methods: {
+		// Requests the parse for an entered url
 		request: function() {
 			self = this;
 			this.error = false;
@@ -115,6 +127,7 @@ Vue.component('parse', {
 	}
 });
 
+// Defines the Capito start menu component
 Vue.component('start', {
 	props: ['start'],
 	template: '\
@@ -135,6 +148,7 @@ Vue.component('start', {
 		</div>\
 	',
 	methods: {
+		// Emits the message tp open a changelog
 		open: function(changelog) {
 			this.$emit('open', changelog);
 		}

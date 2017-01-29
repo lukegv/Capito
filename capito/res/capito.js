@@ -6,6 +6,7 @@ Vue.directive('focus', {
 	}
 });
 
+// Initializes the Capito app
 var capito = new Vue({
 	el: '#capito',
 	data: {
@@ -14,19 +15,23 @@ var capito = new Vue({
 		start: modes()
 	},
 	methods: {
+		// Creates a new empty changelog and shows it
 		empty: function() {
 			this.changelog = { name: 'New changelog', versions: [] };
 		},
+		// Shows the menu
 		menu: function(mode) {
 			this.changelog = null;
 			this.start.set(mode);
 		},
+		// Opens a changelog
 		open: function(changelog) {
 			this.changelog = changelog;
 		}
 	}
 });
 
+/** Creates a new mode object */
 function modes() {
 	return {
 		mode: 0,

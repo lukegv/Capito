@@ -1,3 +1,4 @@
+// Defines the Capito timeline component
 Vue.component('timeline', {
 	props: ['model'],
 	template: '\
@@ -11,6 +12,7 @@ Vue.component('timeline', {
 		</div>\
 	',
 	mounted: function() {
+		// Create the timeline on start
 		this.create();
 	},
 	data: function() {
@@ -19,12 +21,14 @@ Vue.component('timeline', {
 		};
 	},
 	methods: {
+		// Creates a changelog timeline
 		create: function() {
 			timeline(this.model.versions, sel => { this.selected = sel });
 		}
 	}
 });
 
+/** Build a changelog timeline */
 function timeline(versions, selection) {
 	// Calculate the time values (unix time)
 	versions.forEach(v => v.time = new Date(v.date).getTime())
@@ -63,7 +67,7 @@ function timeline(versions, selection) {
 		});
 }
 
-// Calculates the x position on the timeline
+/** Calculates the x position on the timeline */
 function x(start, end, time) {
 	var range = end - start;
 	return 50 + (time - start) / range * 1000;
