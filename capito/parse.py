@@ -6,8 +6,8 @@ import requests;
 from capito import changelogs;
 from capito.changelogs import Changelog, Version;
 
-regex_version = "^(?:[^*#\s-]).*(\d+(?:\.\d+)+).*";
-regex_version_name = "(\d+(?:\.\d+)+)";
+regex_version = "^(?:[^*#\s-]).*(\d+(?:\.\w+)+).*";
+regex_version_name = "(\d+(?:\.\w+)+)";
 regex_date = "([0-9].*[0-9])";
 regex_change = "(?:[*#-])\s.*";
 
@@ -29,13 +29,13 @@ def read_date(string):
 class TextParser():
     
     def check(self, url, mime):
-        confidence = 10 if url.endswith('.txt') else 0;
-        confidence += 50 if mime.startswith('text/plain') else 0;
+        confidence = 40 if url.endswith('.txt') else 0;
+        confidence += 30 if mime.startswith('text/plain') else 0;
         return confidence;
     
     def parse(self, content, url, mime, name=''):
         if not mime.startswith('text/plain'): return None;
-        changelog = Changelog(name);
+        changelog = Changelog('');
         version = None;
         lines = content.splitlines();
         for line in lines:
@@ -52,29 +52,56 @@ class TextParser():
 # Parses markdown changelogs
 class MarkdownParser():
     
-    def __init__(self):
-        self.markdown = mistune.BlockLexer();
-    
     def check(self, url, mime):
-        confidence = 10 if url.endswith('.md') else 0;
-        confidence += 60 if mime.startswith('text/markdown') else 0;
+        confidence = 50 if url.endswith('.md') else 0;
+        confidence += 40 if mime.startswith('text/markdown') else 0;
         return confidence;
         
-    def parse(self, content, url, mime, name=''):
-        tokens = self.markdown(content);
-        return None;
-
+    def parse(self, content, url, mime):
+        tokens = mistune.BlockLexer()(content);
+        changelog = Changelog('');
+        version = None;
+        category = None;
+        text = '';
+        for token in tokens:
+            if token['type'] == 'heading' and token['level'] == 2:
+                if version:
+                    changelog.add_version(version);
+                    category = None;
+                res1 = re.search(regex_version_name, token['text']);
+                name = res1.group() if res1 else '';
+                res2 = re.sub(regex_version_name, '', token['text']);
+                version = Version(name, read_date(res2));
+            if token['type'] == 'heading' and token['level'] == 3:
+                category = token['text'];
+            if token['type'] == 'list_item_end':
+                version.add_new_change(text, category);
+                text = '';
+            if token['type'] == 'text':
+                text = text + token['text'] + ' ';
+        return changelog;
+        
+# Reads a changelog in the universal changelog format (based on JSON)
+class UclfReader():
+    
+    def check(self, url, mime):
+        confidence = 30 if mime.startswith('application/json') else 0;
+        confidence += 70 if url.endswith('.uclf') else 0;
+        return confidence;
+    
+    def parse(self, content, url, mime):
+        return changelogs.from_json(content);
+    
 # Searches GitHub repositories for changelogs
 class GitHubConnector():
     
     def check(self, url, mime):
-        return 90 if re.search(regex_github, url) else 0;
+        return 100 if re.search(regex_github, url) else 0;
     
     def parse(self, content, url, mime):
-        # Get the repository name
-        name = None;
-        res = re.search(regex_github, url);
-        if res: name = res.group(1).split('/')[1];
+        # Determine the repository name
+        result = re.search(regex_github, url);
+        name = result.group(1).split('/')[1] if result else None;
         # Check for raw url
         if not re.search(regex_github_raw, url):
             # Check for blob url
@@ -83,15 +110,18 @@ class GitHubConnector():
                 (mime, content) = self.request(url);
             else:
                 # Check common changelog files
-                res = re.search(regex_github, url);
-                if not res: return None;
-                url = 'https://raw.githubusercontent.com/' + res.group(1) + '/master/CHANGELOG.md';
+                project = re.search(regex_github, url);
+                if not project: return None;
+                urls = ['https://raw.githubusercontent.com/' + project.group(1) + '/master/CHANGELOG.md',
+                        'https://raw.githubusercontent.com/' + project.group(1) + '/master/CHANGELOG.txt'];
+                url = urls.pop(0);
                 (mime, content) = self.request(url);
-                if not content:
-                    url = 'https://raw.githubusercontent.com/' + res.group(1) + '/master/CHANGELOG.txt';
+                while not content and len(urls) > 0:
+                    url = urls.pop(0);
                     (mime, content) = self.request(url);
+        # Check if any content is available
         if not content: return None;
-        return self.parse_content(content, url, mime, name);
+        return process(url, mime, content, True, name);
     
     def request(self, url):
         result = requests.get(url);
@@ -99,32 +129,24 @@ class GitHubConnector():
         mime = result.headers.get('Content-type', None);
         content = result.text;
         return (mime, content);
-    
-    def parse_content(self, content, url, mime, name):
-        if mime.startswith('text/markdown'):
-            return MarkdownParser().parse(content, url, mime, name);
-        elif mime.startswith('text/plain'):
-            return TextParser().parse(content, url, mime, name);
-        elif mime.startswith('application/json'):
-            return UclfReader().parse(content, url, mime);
-        return None;
-        
-# Reads a changelog in the universal changelog format (based on JSON)
-class UclfReader():
-    
-    def check(self, url, mime):
-        return 80 if mime.startswith('application/json') else 0;
-    
-    def parse(self, content, url, mime):
-        return changelogs.from_json(content);
 
 # List all parsers
-parsers = [TextParser(), MarkdownParser(), GitHubConnector(), UclfReader()];
+parsers = [TextParser(), MarkdownParser(), UclfReader()];
 
-# Sorts and applies the listes parsers
-def process(url, mime, content):
-    sequence = sorted(parsers, key=lambda p: p.check(url, mime), reverse=True);
-    result = sequence.pop(0).parse(content, url, mime);
-    while result == None and len(sequence) > 0:
-        result = sequence.pop(0).parse(content, url, mime);
-    return result;
+# List all connectors
+connectors = [GitHubConnector()];
+
+# Sorts and applies the available parsers
+def process(url, mime, content, parse_only=False, name=None):
+    # Sort parsers by confidence
+    sequence = sorted(parsers if parse_only else parsers + connectors,
+        key=lambda p: p.check(url, mime), reverse=True);
+    # Try each parser
+    changelog = sequence.pop(0).parse(content, url, mime);
+    while changelog == None and len(sequence) > 0:
+        changelog = sequence.pop(0).parse(content, url, mime);
+    # Apply possible name to parsed changelog
+    if changelog and changelog.name == '' and not name == None:
+        changelog.name = name;
+    print(len(changelog.versions));
+    return changelog;

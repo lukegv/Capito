@@ -8,12 +8,10 @@
 		<link rel="stylesheet" href="res/bootstrap/css/bootstrap.css" type="text/css" />
 		<link rel="stylesheet" href="res/bootstrap/css/bootstrap-theme.css" type="text/css" />
 		<link rel="stylesheet" href="res/bootstrap/css/spin.css" type="text/css" />
-		<link rel="stylesheet" href="res/select2/css/select2.css" type="text/css" />
 		<link rel="stylesheet" href="res/capito.css" type="text/css" />
 		<!-- Load scripts -->
 		<script src="res/jquery/js/jquery.js"></script>
 		<script src="res/bootstrap/js/bootstrap.js"></script>
-		<script src="res/select2/js/select2.full.js"></script>
 		<script src="res/d3/d3.js"></script>
 		<script src="res/vue/vue.js"></script>
 		<!-- Load vue components -->
@@ -28,7 +26,7 @@
 			<!-- Navigation bar -->
 			<navbar :view="view" @menu="menu" @empty="empty"></navbar>
 			<!-- Changelog -->
-			<div v-if="loaded" class="col-md-offset-1 col-md-10" >
+			<div v-if="changelog" class="col-md-offset-1 col-md-10" >
 				<classic v-if="view.is(0)" :model="changelog"></classic>
 				<timeline v-if="view.is(1)" :model="changelog"></timeline>
 			</div>

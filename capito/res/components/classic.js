@@ -139,6 +139,9 @@ Vue.component('classic', {
 			</div>\
 		</div>\
 	',
+	created: function() {
+		this.sort();
+	},
 	data: function() {
 		return { editable: false }
 	},
@@ -171,15 +174,22 @@ Vue.component('classic', {
 });
 
 function colorize(name) {
-	if (name == 'Security') {
-		return 'label-danger';
-	} else if (name == 'Feature') {
+	if (['Feature', 'Add', 'Added', 'New', 'Dev'].indexOf(name) >= 0) {
 		return 'label-primary';
-	} else if (name == 'Bugfix') {
-		return 'label-success';
-	} else {
-		return 'label-default';
 	}
+	if (['Fixed', 'Bugfix', 'Fix'].indexOf(name) >= 0) {
+		return 'label-success';
+	}
+	if (['Security', 'Warning'].indexOf(name) >= 0) {
+		return 'label-danger';
+	}
+	if (['Removed', 'Remove', 'Deprecated', 'Missing'].indexOf(name) >= 0) {
+		return 'label-warning';
+	}
+	if (['Changed', 'Change', 'Tweak'].indexOf(name) >= 0) {
+		return 'label-info';
+	}
+	return 'label-default';
 }
 
 function compare(v1, v2) {

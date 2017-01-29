@@ -6,28 +6,19 @@ Vue.directive('focus', {
 	}
 });
 
-Vue.directive('tags', {
-	inserted: function(el) {
-		
-	}
-});
-
 var capito = new Vue({
 	el: '#capito',
 	data: {
-		changelog: {},
+		changelog: null,
 		view: modes(),
 		start: modes()
-	},
-	computed: {
-		loaded: function() { return !$.isEmptyObject(this.changelog); }
 	},
 	methods: {
 		empty: function() {
 			this.changelog = { name: 'New changelog', versions: [] };
 		},
 		menu: function(mode) {
-			this.changelog = {};
+			this.changelog = null;
 			this.start.set(mode);
 		},
 		open: function(changelog) {
