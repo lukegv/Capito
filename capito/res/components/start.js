@@ -40,12 +40,15 @@ Vue.component('list', {
 				<ul v-if="result.length > 0" class="list-group">\
 					<item v-for="name in result" :name="name" @open="open" @removed="removed" />\
 				</ul>\
-				<p v-else style="text-align: center;">\
+				<p v-else style="text-align: center; color: red;">\
 					<span class="glyphicon glyphicon-exclamation-sign" /> No changelog found!\
 				</p>\
 			</div>\
 		</div>\
 	',
+	mounted: function() {
+		this.load();
+	},
 	data: function() { 
 		return { 
 			all: [],
@@ -84,20 +87,27 @@ Vue.component('parse', {
 					<span class="glyphicon glyphicon-cloud-download" /> Request & Parse\
 				</span>\
 			</button>\
+			<p v-if="error" class="apart" style="color: red;">\
+				<span class="glyphicon glyphicon-exclamation-sign" /> Unsuccessful parse. No changelog found!\
+			</p>\
 		</div>\
 	',
 	data: function() {
 		return {
 			url: '',
-			processing: false
+			processing: false,
+			error: false
 		};
 	},
 	methods: {
 		request: function() {
-			this.processing = true;
 			self = this;
+			this.error = false;
+			this.processing = true;
 			$.get('/parse?url=' + this.url, function(result) {
-				self.processing = false;
+				self.$emit('open', result);
+			}).fail(function() {
+				self.error = true;
 			}).always(function() {
 				self.processing = false;
 			});

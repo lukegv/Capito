@@ -13,7 +13,7 @@ class Changelog:
         self.versions.append(Version(name, date));
         
     def to_json(self):
-        changelog_dic = { 'name': self.name, 'versions': [] };
+        changelog_dic = { 'name': self.name, 'versions': [], 'uclf': True };
         for version_obj in self.versions:
             version_dic = {
                 'name': version_obj.name,
@@ -52,10 +52,16 @@ class Change:
 
 def from_json(content):
     try:
-        dictionary = json.loads(content);
-        changelog = Changelog(dictionary['name']);
-        # TODO: load rest of dictionary
-        return changelog;
+        changelog_dic = json.loads(content);
+        if not changelog_dic['uclf']: return None;
+        changelog_obj = Changelog(changelog_dic['name']);
+        for version_dic in changelog_dic['versions']:
+            version_obj = Version(version_dic['name'], version_dic['date']);
+            for change_dic in version_dic['changes']:
+                change_obj = Change(change_dic['description'], change_dic['category'], change_dic['tags']);
+                version_obj.add_change(change_obj);
+            changelog_obj.add_version(version_obj);
+        return changelog_obj;
     except:
         return None;
 

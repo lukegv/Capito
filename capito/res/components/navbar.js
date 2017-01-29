@@ -29,7 +29,6 @@ Vue.component('navbar', {
 			        		<ul class="dropdown-menu">\
 								<view-opt :mode="0" text="Classical" :view="view" />\
 								<view-opt :mode="1" text="Timeline" :view="view" />\
-								<view-opt :mode="2" text="Minimum version" :view="view" />\
 			        		</ul>\
 			        	</li>\
 			        </ul>\

@@ -1,5 +1,5 @@
 Vue.component('change', {
-	props: ['model'],
+	props: ['model', 'index'],
 	template: '\
 		<li>\
 			<div class="well" v-if="editable" >\
@@ -35,7 +35,8 @@ Vue.component('change', {
 	},
 	methods: {
 		destroy: function() {
-			
+			this.editable = false;
+			this.$emit('destroyed', this.index);
 		},
 		edit: function(on) {
 			this.editable = on;
@@ -62,7 +63,7 @@ Vue.component('version', {
 				</h4>\
 			</div>\
 			<ul>\
-				<change v-for="change in model.changes" :model="change" />\
+				<change v-for="(change, index) in model.changes" :model="change" :index="index" @destroyed="remove" />\
 				<li class="free">\
 					<button type="button" class="btn btn-xs btn-default" @click="add">\
 						<span class="glyphicon glyphicon-plus" /> Add change\
@@ -95,6 +96,9 @@ Vue.component('version', {
 		destroy: function() {
 			this.editable = false;
 			this.$emit('destroyed', this.index);
+		},
+		remove: function(index) {
+			this.model.changes.splice(index, 1);
 		}
 	}
 });
@@ -107,7 +111,8 @@ Vue.component('classic', {
 				<!-- Links -->\
 				<div class="col-md-2">\
 					<div class="list-group">\
-						<a v-for="version in model.versions" v-if="version.name" class="list-group-item" :href="link(version)">\
+						<a v-for="version in model.versions" v-if="version.name" \
+							class="list-group-item" :href="link(version)">\
 							{{version.name}}\
 						</a>\
 					</div>\
@@ -122,7 +127,8 @@ Vue.component('classic', {
 					<button type="button" class="btn btn-default" @click="add">\
 						<span class="glyphicon glyphicon-plus" /> Add version\
 					</button>\
-					<version v-for="(version, index) in model.versions" :model="version" :index="index" @edited="sort" @destroyed="remove" />\
+					<version v-for="(version, index) in model.versions" :model="version" :index="index" \
+						@edited="sort" @destroyed="remove" />\
 				</div>\
 				<!-- Actions -->\
 				<div class="col-md-2">\

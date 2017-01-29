@@ -10,15 +10,20 @@ import socketserver;
 import capito.changelogs;
 import capito.parse;
 
+# Execute the Capito server
 def run(port):
+    # Initialize mime type dictionary
     if not mimetypes.inited:
         mimetypes.init();
+    # Start the HTTP server
     server = ThreadedHTTPServer(('127.0.0.1', port), RequestHandler);
     server.serve_forever();
-    
+
+# Defines a HTTP server with multi thread request handling
 class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
     pass;
     
+# Defines how to handle the Capito requests
 class RequestHandler(http.server.BaseHTTPRequestHandler):
     
     # Handle GET requests
@@ -54,7 +59,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             keys = list(map(lambda v: v.decode(), store.keys()));
             result = json.dumps(keys);
             self.respond(200, 'application/json');
-            self.wfile.write(bytes(result, 'UTF-8'));
+            self.wfile.write(result.encode());
     
     def load_log(self):
         name = self.params.get('name', None);
@@ -101,7 +106,8 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             mime = result.headers.get('Content-type', None);
             changelog = capito.parse.process(url, mime, result.text);
             if changelog != None:
-                pass;
+                self.respond(200, 'application/json');
+                self.wfile.write(changelog.to_json().encode());
             else:
                 self.error(404, 'No changelog found');
         else:
@@ -112,7 +118,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         stream = None;
         try:
             stream = open(self.path, 'rb');
-            (mime, encoding) = mimetypes.guess_type(self.path, False); # @UnusedVariable
+            mime = mimetypes.guess_type(self.path, False)[0];
             self.respond(200, mime);
             shutil.copyfileobj(stream, self.wfile);
         except:
@@ -123,12 +129,13 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
     
     def error(self, code, message):
         self.respond(code, 'text/plain');
-        self.wfile.write(bytes('ERROR: ' + message, 'UTF-8'));
+        self.wfile.write(('ERROR: ' + message).encode());
 
     def respond(self, code, mime):
         self.send_response(code);
         self.send_header('Content-type', mime);
         self.end_headers();
 
+# Capito application entry point
 if (__name__ == '__main__'):
     run(8080);

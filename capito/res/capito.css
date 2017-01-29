@@ -1,3 +1,6 @@
+
+/* Define distances between elements */
+
 .space {
 	margin: 0 3px;
 }
@@ -9,6 +12,8 @@
 .apart {
 	margin-top: 10px;
 }
+
+/* Give input elements the same size as the corresponding text elements */
 
 input.h1 {
 	width: auto;
@@ -37,7 +42,7 @@ input.span {
 	height: auto;
 	line-height: 1.1;
 	font-size: 14px;
-	padding: 6px 12px;
+	padding: 3px 12px;
 	margin: 3px 0 3px;
 }
 
@@ -47,6 +52,6 @@ textarea.span {
 	width: 100%;
 	height: 75px;
 	font-size: 14px;
-	padding: 6px 12px;
+	padding: 3px 12px;
 	margin: 3px 0 3px;
 }
