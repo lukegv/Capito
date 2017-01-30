@@ -18,6 +18,7 @@ def run(port):
     # Start the HTTP server
     server = ThreadedHTTPServer(('127.0.0.1', port), RequestHandler);
     server.serve_forever();
+    print('Running Capito on 127.0.0.1:' + port);
 
 # Defines a HTTP server with multi thread request handling
 class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
@@ -30,6 +31,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         # Parse url parameters
         self.params = furl.furl(self.path).args;
+        # Determine the base path
         if self.path == '/':
             self.serve_resource('capito.html');
         elif self.path.startswith('/res/'):
@@ -143,7 +145,3 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         self.send_response(code);
         self.send_header('Content-type', mime);
         self.end_headers();
-
-# Capito application entry point
-if (__name__ == '__main__'):
-    run(8080);
