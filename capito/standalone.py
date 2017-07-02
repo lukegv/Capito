@@ -16,9 +16,9 @@ def run(port):
     if not mimetypes.inited:
         mimetypes.init();
     # Start the HTTP server
+    print('Running Capito on 127.0.0.1:' + str(port));
     server = ThreadedHTTPServer(('127.0.0.1', port), RequestHandler);
     server.serve_forever();
-    print('Running Capito on 127.0.0.1:' + port);
 
 # Defines a HTTP server with multi thread request handling
 class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):

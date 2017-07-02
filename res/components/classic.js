@@ -5,11 +5,11 @@ Vue.component('change', {
 		<li>\
 			<div class="well" v-if="editable" >\
 				<textarea type="text" class="form-control span" placeholder="Description" v-focus v-model.trim="model.description" \
-					@keyup.enter="edit(false)" @focus="edit(true)" @blur="edit(false)" />\
+					@keyup.enter="edit(false)" @keyup.esc="edit(false)" />\
 				<div>\
 					<input type="text" class="form-control span" placeholder="Category" v-model.trim="model.category" \
-						@keyup.enter="edit(false)" @focus="edit(true)" @blur="edit(false)" />\
-					<button type="button" class="btn btn-danger btn-xs space" @click.prevent="destroy" @focus="edit(true)">\
+						@keyup.enter="edit(false)" @keyup.esc="edit(false)" />\
+					<button type="button" class="btn btn-danger btn-xs space" @click.prevent="destroy">\
 						<span class="glyphicon glyphicon-trash" />\
 					</button>\
 				</div>\
@@ -57,10 +57,10 @@ Vue.component('version', {
 			<div>\
 				<div v-if="editable">\
 					<input type="text" class="h4 form-control" placeholder="Name" v-focus v-model.trim="model.name" \
-						@keyup.enter="edit(false)" @blur="edit(false)" @focus="edit(true)" />\
+						@keyup.enter="edit(false)" @keyup.esc="edit(false)" />\
 					<input type="text" class="h4 form-control" placeholder="Date" v-model.trim="model.date" \
-						maxlength="10" @keyup.enter="edit(false)" @blur="edit(false)" @focus="edit(true)" />\
-					<button type="button" class="btn btn-danger btn-xs space" @click.prevent="destroy" @focus="edit(true)">\
+						maxlength="10" @keyup.enter="edit(false)" @keyup.esc="edit(false)" />\
+					<button type="button" class="btn btn-danger btn-xs space" @click.prevent="destroy">\
 						<span class="glyphicon glyphicon-trash" />\
 					</button>\
 				</div>\
@@ -134,7 +134,7 @@ Vue.component('classic', {
 				<div class="col-md-8">\
 					<div>\
 						<input v-if="editable" type="text" class="h1 form-control" placeholder="Name" \
-							v-focus v-model.trim="model.name" @keyup.enter="edit(false)" @blur="edit(false)" />\
+							v-focus v-model.trim="model.name" @keyup.enter="edit(false)" @keyup.esc="edit(false)" />\
 						<h1 v-else @click="edit(true)">{{name}}</h1>\
 					</div>\
 					<button type="button" class="btn btn-default" @click="add">\
